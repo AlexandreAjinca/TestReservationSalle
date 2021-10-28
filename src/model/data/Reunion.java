@@ -2,7 +2,9 @@ package model.data;
 
 import java.io.Serializable;
 
-public class Reunion implements Serializable {
+public class Reunion implements Comparable {
+
+
     public enum TypeReunion{
         VC,
         SPEC,
@@ -52,6 +54,12 @@ public class Reunion implements Serializable {
 
     public void setCreneau(int creneau) {
         this.creneau = creneau;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        Reunion element = (Reunion) o;
+        return this.idReunion-element.idReunion;
     }
 
     @Override

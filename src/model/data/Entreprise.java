@@ -69,7 +69,7 @@ public class Entreprise implements Serializable {
         System.out.println("Create planning : ");
 
         //On crée et initialise la Map
-        Map<Reunion,List<Salle>> sallesPourReunion = new HashMap<>();
+        Map<Reunion,List<Salle>> sallesPourReunion = new TreeMap<>();
         for(Reunion r : reunions){
             sallesPourReunion.put(r,new ArrayList<>(locaux));
         }
@@ -80,111 +80,64 @@ public class Entreprise implements Serializable {
             spr.getValue().removeIf(x->x.getCapacite()*0.7 < spr.getKey().getNbPersonnes());
         }
 
-        //Si une réunion n'a qu'une salle possible, on lui assigne
-        System.out.println("On cherche les réunions qui n'ont qu'une salle dispo  : ");
-        for(Map.Entry<Reunion,List<Salle>> spr : sallesPourReunion.entrySet()){
-            if(spr.getValue().size()==1){
-                Reunion r = spr.getKey();
-                Salle s = spr.getValue().get(0);
-                System.out.println("On a trouvé la réunion : " +r + " qui n'a que la salle : " + s);
-                if(isDisponible(s,r.getCreneau())){
-                    Reservation newRes = new Reservation(r,s);
-                    newRes.setEquipementReserve(new HashMap<>(Map.of(Ecran, 0, Pieuvre, 0, Webcam, 0, Tableau, 0)));
-                    //On ajoute le matériel manquant à la salle
-                    switch(r.getType()) {
-                        case VC:
-                            if (s.getEquipements().get(Ecran) == 0)
-                                newRes.getEquipementReserve().put(Ecran, 1);
-                            if (s.getEquipements().get(Pieuvre) == 0)
-                                newRes.getEquipementReserve().put(Pieuvre, 1);
-                            if (s.getEquipements().get(Webcam) == 0)
-                                newRes.getEquipementReserve().put(Webcam, 1);
-                            break;
-                        case SPEC:
-                            if (s.getEquipements().get(Tableau) == 0)
-                                newRes.getEquipementReserve().put(Tableau, 1);
-                            break;
-                        case RS:
-                            break;
-                        case RC:
-                            if (s.getEquipements().get(Ecran) == 0)
-                                newRes.getEquipementReserve().put(Ecran, 1);
-                            if (s.getEquipements().get(Pieuvre) == 0)
-                                newRes.getEquipementReserve().put(Pieuvre, 1);
-                            if (s.getEquipements().get(Tableau) == 0)
-                                newRes.getEquipementReserve().put(Tableau, 1);
+        while(sallesPourReunion.values().stream().anyMatch(x -> x.size()==1)){
+            //Si une réunion n'a qu'une salle possible, on lui assigne
+            System.out.println("On cherche les réunions qui n'ont qu'une salle dispo  : ");
+            for(Map.Entry<Reunion,List<Salle>> spr : sallesPourReunion.entrySet()){
+                if(spr.getValue().size()==1){
+                    Reunion r = spr.getKey();
+                    Salle s = spr.getValue().get(0);
+                    System.out.println("On a trouvé la réunion : " +r + " qui n'a que la salle : " + s);
+                    if(isDisponible(s,r.getCreneau())){
+                        Reservation newRes = new Reservation(r,s);
+                        newRes.setEquipementReserve(new HashMap<>(Map.of(Ecran, 0, Pieuvre, 0, Webcam, 0, Tableau, 0)));
+                        //On ajoute le matériel manquant à la salle
+                        switch(r.getType()) {
+                            case VC:
+                                if (s.getEquipements().get(Ecran) == 0)
+                                    newRes.getEquipementReserve().put(Ecran, 1);
+                                if (s.getEquipements().get(Pieuvre) == 0)
+                                    newRes.getEquipementReserve().put(Pieuvre, 1);
+                                if (s.getEquipements().get(Webcam) == 0)
+                                    newRes.getEquipementReserve().put(Webcam, 1);
+                                break;
+                            case SPEC:
+                                if (s.getEquipements().get(Tableau) == 0)
+                                    newRes.getEquipementReserve().put(Tableau, 1);
+                                break;
+                            case RS:
+                                break;
+                            case RC:
+                                if (s.getEquipements().get(Ecran) == 0)
+                                    newRes.getEquipementReserve().put(Ecran, 1);
+                                if (s.getEquipements().get(Pieuvre) == 0)
+                                    newRes.getEquipementReserve().put(Pieuvre, 1);
+                                if (s.getEquipements().get(Tableau) == 0)
+                                    newRes.getEquipementReserve().put(Tableau, 1);
+                        }
+                        System.out.println("Elle est dispo, on crée la réservation : " + newRes);
+                        reservations.add(newRes);
+                    }else{
+                        //throw new Exception("La seulle salle de bonne capacité n'est plus disponible");
+                        System.out.println("La salle n'est pas dispo à ce créneau");
+                        reservations.add(new Reservation(r,null));
                     }
-                    System.out.println("Elle est dispo, on crée la réservation : " + newRes);
-                    reservations.add(newRes);
-                }else{
-                    //throw new Exception("La seulle salle de bonne capacité n'est plus disponible");
-                    System.out.println("La salle n'est pas dispo à ce créneau");
-                    reservations.add(new Reservation(r,null));
                 }
+            }
+
+            //On enlève les réunions assignées de la Map
+            System.out.println("On retire les réunions réservées de la Map");
+            for(Reservation r : reservations){
+                sallesPourReunion.remove(r.getReunion());
+            }
+
+            //On enlève les salles déjà prises des salles possible
+            System.out.println("On retire les salles déjà prises des réunions restantes");
+            for(Map.Entry<Reunion,List<Salle>> spr : sallesPourReunion.entrySet()){
+                spr.getValue().removeIf(x -> reservations.stream().anyMatch(y -> y.getSalle()==x &&( y.getReunion().getCreneau()==spr.getKey().getCreneau() || y.getReunion().getCreneau()==spr.getKey().getCreneau()-1)));
             }
         }
 
-        //On enlève les réunions assignées de la Map
-        System.out.println("On retire les réunions réservées de la Map");
-        for(Reservation r : reservations){
-            sallesPourReunion.remove(r.getReunion());
-        }
-
-        //On enlève les salles déjà prises des salles possible
-        System.out.println("On retire les salles déjà prises des réunions restantes");
-        for(Map.Entry<Reunion,List<Salle>> spr : sallesPourReunion.entrySet()){
-            spr.getValue().removeIf(x -> reservations.stream().anyMatch(y -> y.getSalle()==x &&( y.getReunion().getCreneau()==spr.getKey().getCreneau() || y.getReunion().getCreneau()==spr.getKey().getCreneau()-1)));
-        }
-
-        //Si une réunion n'a qu'une salle possible, on lui assigne
-        System.out.println("On cherche les réunions qui n'ont qu'une salle dispo  : ");
-        for(Map.Entry<Reunion,List<Salle>> spr : sallesPourReunion.entrySet()){
-            if(spr.getValue().size()==1){
-                Reunion r = spr.getKey();
-                Salle s = spr.getValue().get(0);
-                System.out.println("On a trouvé la réunion : " +r + " qui n'a que la salle : " + s);
-                if(isDisponible(s,r.getCreneau())){
-                    Reservation newRes = new Reservation(r,s);
-                    newRes.setEquipementReserve(new HashMap<>(Map.of(Ecran, 0, Pieuvre, 0, Webcam, 0, Tableau, 0)));
-                    //On ajoute le matériel manquant à la salle
-                    switch(r.getType()) {
-                        case VC:
-                            if (s.getEquipements().get(Ecran) == 0)
-                                newRes.getEquipementReserve().put(Ecran, 1);
-                            if (s.getEquipements().get(Pieuvre) == 0)
-                                newRes.getEquipementReserve().put(Pieuvre, 1);
-                            if (s.getEquipements().get(Webcam) == 0)
-                                newRes.getEquipementReserve().put(Webcam, 1);
-                            break;
-                        case SPEC:
-                            if (s.getEquipements().get(Tableau) == 0)
-                                newRes.getEquipementReserve().put(Tableau, 1);
-                            break;
-                        case RS:
-                            break;
-                        case RC:
-                            if (s.getEquipements().get(Ecran) == 0)
-                                newRes.getEquipementReserve().put(Ecran, 1);
-                            if (s.getEquipements().get(Pieuvre) == 0)
-                                newRes.getEquipementReserve().put(Pieuvre, 1);
-                            if (s.getEquipements().get(Tableau) == 0)
-                                newRes.getEquipementReserve().put(Tableau, 1);
-                    }
-                    System.out.println("Elle est dispo, on crée la réservation : " + newRes);
-                    reservations.add(newRes);
-                }else{
-                    //throw new Exception("La seulle salle de bonne capacité n'est plus disponible");
-                    System.out.println("La salle n'est pas dispo à ce créneau");
-                    reservations.add(new Reservation(r,null));
-                }
-            }
-        }
-
-        //On enlève les réunions assignées de la Map
-        System.out.println("On retire les réunions réservées de la Map");
-        for(Reservation r : reservations){
-            sallesPourReunion.remove(r.getReunion());
-        }
 
         //TODO Enlever cette partie si l'autre fonctionne
         //Algorithme d'attribution des salles dans l'ordre
