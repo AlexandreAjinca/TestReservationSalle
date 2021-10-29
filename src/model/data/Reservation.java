@@ -1,10 +1,9 @@
 package model.data;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Reservation implements Serializable {
+public class Reservation {
     private Reunion reunion;
     private Salle salle;
     private Map<TypeEquipement,Integer> equipementReserve = new HashMap<>();

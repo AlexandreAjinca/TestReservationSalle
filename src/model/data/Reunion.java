@@ -1,9 +1,6 @@
 package model.data;
 
-import java.io.Serializable;
-
 public class Reunion implements Comparable {
-
 
     public enum TypeReunion{
         VC,

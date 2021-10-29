@@ -1,9 +1,9 @@
 package model.data;
 
-import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public class Salle {
+public class Salle implements Comparable{
     private String nom;
     private int capacite;
     private Map<TypeEquipement,Integer> equipements = new HashMap<>();
@@ -45,6 +45,13 @@ public class Salle {
 
     public void setEquipements(Map<TypeEquipement,Integer> equipements) {
         this.equipements = equipements;
+    }
+
+
+    @Override
+    public int compareTo(Object o) {
+        Salle element = (Salle) o;
+        return this.capacite-element.getCapacite();
     }
 
     @Override
