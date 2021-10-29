@@ -63,5 +63,4 @@ public class Salle implements Comparable{
         result+="]";
         return result;
     }
-
 }
