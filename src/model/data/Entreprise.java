@@ -248,10 +248,15 @@ public class Entreprise {
     public void displayReservations() {
         System.out.println("LISTE DES RESERVATIONS : ");
         for(Reservation e : reservations){
-            System.out.println(e);
+            if(e.getSalle()==null){
+                System.out.println(e.getReunion() + " Aucune salle ne respectait les conditions pour cette réunion");
+            }else{
+                System.out.println(e);
+            }
         }
     }
 
+    //GETTERS ET SETTERS
     public List<Reunion> getReunions() {
         return reunions;
     }
