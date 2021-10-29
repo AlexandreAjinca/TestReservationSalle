@@ -39,7 +39,7 @@ public class Reservation {
 
     @Override
     public String toString(){
-        return "[RESERVATION : " + reunion + " ; " + salle +"]";
+        return "[RESERVATION : " + reunion + " ; " + salle + " ; equipement réservé : " + equipementReserve +"]";
     }
 
 }
