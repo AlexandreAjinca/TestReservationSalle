@@ -67,20 +67,20 @@ public class Entreprise {
 
     //Remplit la liste de réservation en respactant les contraintes
     public void createPlanning() {
-        //On crée et initialise la Map
+        //On crée et on initialise une Map qui associe à chaque réunion ses salles potentielles
         Map<Reunion,List<Salle>> ReunionsNonReservees = new TreeMap<>();
         for(Reunion r : reunions){
             ReunionsNonReservees.put(r,new ArrayList<>(locaux));
         }
 
-        //On réduit les salles à celles de capacité suffisante
+        //On enlève les salles ne respectant pas les restrictions de capacité
         for(Map.Entry<Reunion,List<Salle>> rnr : ReunionsNonReservees.entrySet()){
             rnr.getValue().removeIf(x->x.getCapacite()*0.7 < rnr.getKey().getNbPersonnes());
         }
 
         //Tant qu'il reste des réunions a assigner
         while(ReunionsNonReservees.size()>0){
-            //Tant qu'il y a des réunions avec une seule salle possible, on les réserve.
+            //Tant qu'il y a des réunions avec une seule salle possible, on les cherche pour les réserver
             while(ReunionsNonReservees.values().stream().anyMatch(x -> x.size()==1)){
                 //On parcourt les Reunions, si une réunion n'a qu'une salle possible, on lui assigne
                 for(Map.Entry<Reunion,List<Salle>> rnr : ReunionsNonReservees.entrySet()){
@@ -114,6 +114,7 @@ public class Entreprise {
                                         newRes.getEquipementReserve().put(Pieuvre, 1);
                                     if (s.getEquipements().get(Tableau) == 0)
                                         newRes.getEquipementReserve().put(Tableau, 1);
+                                    break;
                             }
                             reservations.add(newRes);
                         }else{
@@ -133,17 +134,12 @@ public class Entreprise {
             }
 
             //Quand il n'y a plus de réunions avec une seule salle possible, on cherche celles avec le moins de salles
-            int min = Collections.min(ReunionsNonReservees.values().stream().map(x -> x.size()).collect(Collectors.toList()));
+            int min = Collections.min(ReunionsNonReservees.values().stream().map(List::size).collect(Collectors.toList()));
             for(Map.Entry<Reunion,List<Salle>> rnr : ReunionsNonReservees.entrySet()){
                 if(rnr.getValue().size()==min){
-                    //Parmi les salles, on choisit la salle avec la plus grande capacité
+                    //Parmi les salles, on choisit la salle avec la plus petite capacité
                     Reunion r =  rnr.getKey();
-                    Salle s = rnr.getValue().stream().reduce((x,y) -> {
-                        if(x.getCapacite() >=y.getCapacite())
-                            return x;
-                        else
-                            return y;
-                    }).get();
+                    Salle s = rnr.getValue().stream().sorted().collect(Collectors.toList()).get(0);
                     //Si la salle est disponible, on crée une nouvelle réservation
                     if(isSalleDisponible(s,r.getCreneau()) && isMaterielDisponible(r,s)){
                         Reservation newRes = new Reservation(r,s);
@@ -171,6 +167,7 @@ public class Entreprise {
                                     newRes.getEquipementReserve().put(Pieuvre, 1);
                                 if (s.getEquipements().get(Tableau) == 0)
                                     newRes.getEquipementReserve().put(Tableau, 1);
+                                break;
                         }
                         reservations.add(newRes);
                     }else{
@@ -191,6 +188,38 @@ public class Entreprise {
             }
         }
     }
+
+    //Retourne le nombre de matériel manquant dans la salle pour cette réunion
+    /*public int countMaterielToAssign(Reunion r,Salle s){
+        int result = 0;
+        switch(r.getType()) {
+            case VC:
+                if (s.getEquipements().get(Ecran) == 0)
+                    result+=1;
+                if (s.getEquipements().get(Pieuvre) == 0)
+                    result+=1;
+                if (s.getEquipements().get(Webcam) == 0)
+                    result+=1;
+                break;
+            case SPEC:
+                if (s.getEquipements().get(Tableau) == 0)
+                    result+=1;
+                break;
+            case RS:
+                break;
+            case RC:
+                if (s.getEquipements().get(Ecran) == 0)
+                    result+=1;
+                if (s.getEquipements().get(Pieuvre) == 0)
+                    result+=1;
+                if (s.getEquipements().get(Tableau) == 0)
+                    result+=1;
+                break;
+            default:
+                break;
+        }
+        return result;
+    }*/
 
     //Retourne false si la salle est réservée à ce créneau (ou celui d'avant à cause des restrictions COVID)
     public boolean isSalleDisponible(Salle s, int creneau){
@@ -249,9 +278,9 @@ public class Entreprise {
         System.out.println("LISTE DES RESERVATIONS : ");
         for(Reservation e : reservations){
             if(e.getSalle()==null){
-                System.out.println(e.getReunion() + " Aucune salle ne respectait les conditions pour cette réunion");
+                System.out.println(e.getReunion() + " Aucune salle ne respectait les conditions pour cette réunion\n");
             }else{
-                System.out.println(e);
+                System.out.println(e.getReunion()+"\n\t" +e.getSalle()+"\n\t\t Équipement réservé :"+e.getEquipementReserve()+"\n");
             }
         }
     }

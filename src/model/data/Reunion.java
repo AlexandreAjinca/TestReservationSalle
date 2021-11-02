@@ -15,12 +15,13 @@ public class Reunion implements Comparable {
     private int creneau;
 
     public Reunion(int i,int c, TypeReunion t, int n ){
-        idReunion = i;
-        type = t;
-        nbPersonnes = n;
-        creneau = c;
+        this.idReunion = i;
+        this.type = t;
+        this.nbPersonnes = n;
+        this.creneau = c;
     }
 
+    //GETTERS ET SETTERS
     public int getIdReunion() {
         return idReunion;
     }

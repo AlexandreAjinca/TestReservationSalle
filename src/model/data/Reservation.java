@@ -3,7 +3,8 @@ package model.data;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Reservation {
+public class Reservation implements Comparable{
+
     private Reunion reunion;
     private Salle salle;
     private Map<TypeEquipement,Integer> equipementReserve = new HashMap<>();
@@ -13,6 +14,7 @@ public class Reservation {
         this.salle = salle;
     }
 
+    //GETTERS ET SETTERS
     public Reunion getReunion() {
         return reunion;
     }
@@ -35,6 +37,12 @@ public class Reservation {
 
     public void setEquipementReserve(Map<TypeEquipement,Integer> equipementReserve) {
         this.equipementReserve = equipementReserve;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        Reservation element = (Reservation) o;
+        return this.reunion.getCreneau()-element.reunion.getCreneau();
     }
 
     @Override

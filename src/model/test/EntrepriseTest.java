@@ -18,6 +18,7 @@ class EntrepriseTest {
         e.createPlanning();
     }
 
+    //Teste si les réservations respectent la condition de capacité
     @org.junit.jupiter.api.Test
     void testCapaciteRespectee() {
         boolean result = true;
@@ -31,6 +32,7 @@ class EntrepriseTest {
         assertTrue(result);
     }
 
+    //Teste si les réservations respectent les conditions d'horaires
     @org.junit.jupiter.api.Test
     void testHorairesNonSuperposees() {
         boolean result = true;
@@ -45,6 +47,7 @@ class EntrepriseTest {
         assertTrue(result);
     }
 
+    //Teste si la quantité de matériel réservée à chaque créneau est cohérente (inférieure ou égale à la quantité de matériel libre)
     @org.junit.jupiter.api.Test
     void testQuantiteMaterielCoherent() {
         boolean result = true;
@@ -62,12 +65,12 @@ class EntrepriseTest {
                 if(total>e.getEquipementLibres().get(te)){
                     result = false;
                 }
-                System.out.println("AU creneau " + c + " il y a " + total + " " + te + " empruntés.");
             }
         }
         assertTrue(result);
     }
 
+    //Teste si toutes les réunions sont dans la liste des réservations (même sans salle)
     @org.junit.jupiter.api.Test
     void testToutesReunionsTraitees() {
         boolean result = true;
@@ -84,6 +87,7 @@ class EntrepriseTest {
         assertTrue(result);
     }
 
+    //Teste si les réunions ont une salle réservée
     @org.junit.jupiter.api.Test
     void testToutesReunionsAssignees() {
         boolean result = true;
