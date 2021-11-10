@@ -22,3 +22,6 @@ Après chaque itération :
     présent ou à emprunter.
     -On crée l'objet Reservation ayant comme attribut la Salle et la Reunion
     -On y ajoute le matériel manquant
+
+La fonction main(String[] args) appelle les fonctions qui créent l'objet Entreprise, l'initialise avec les
+valeurs initiales, crée le planning de réservation et affiche les réservations.

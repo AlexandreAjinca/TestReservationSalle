@@ -12,6 +12,7 @@ public class Reunion implements Comparable {
     private int idReunion;
     private TypeReunion type;
     private int nbPersonnes;
+    //Représente le créneau de la réunion (Si créneau == 8 alors la réunion est de 8h à 9h)
     private int creneau;
 
     public Reunion(int i,int c, TypeReunion t, int n ){

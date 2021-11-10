@@ -7,6 +7,7 @@ public class Salle implements Comparable{
 
     private String nom;
     private int capacite;
+    //Représente les équipements présents dans la Salle
     private Map<TypeEquipement,Integer> equipements = new HashMap<>();
 
     public Salle(String n, int c, Map<TypeEquipement,Integer> e){

@@ -189,38 +189,6 @@ public class Entreprise {
         }
     }
 
-    //Retourne le nombre de matériel manquant dans la salle pour cette réunion
-    /*public int countMaterielToAssign(Reunion r,Salle s){
-        int result = 0;
-        switch(r.getType()) {
-            case VC:
-                if (s.getEquipements().get(Ecran) == 0)
-                    result+=1;
-                if (s.getEquipements().get(Pieuvre) == 0)
-                    result+=1;
-                if (s.getEquipements().get(Webcam) == 0)
-                    result+=1;
-                break;
-            case SPEC:
-                if (s.getEquipements().get(Tableau) == 0)
-                    result+=1;
-                break;
-            case RS:
-                break;
-            case RC:
-                if (s.getEquipements().get(Ecran) == 0)
-                    result+=1;
-                if (s.getEquipements().get(Pieuvre) == 0)
-                    result+=1;
-                if (s.getEquipements().get(Tableau) == 0)
-                    result+=1;
-                break;
-            default:
-                break;
-        }
-        return result;
-    }*/
-
     //Retourne false si la salle est réservée à ce créneau (ou celui d'avant à cause des restrictions COVID)
     public boolean isSalleDisponible(Salle s, int creneau){
         for(Reservation r : reservations){

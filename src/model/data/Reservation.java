@@ -7,6 +7,7 @@ public class Reservation implements Comparable{
 
     private Reunion reunion;
     private Salle salle;
+    //Représente le matériel réservé pour cette réunion
     private Map<TypeEquipement,Integer> equipementReserve = new HashMap<>();
 
     public Reservation(Reunion reunion, Salle salle) {
