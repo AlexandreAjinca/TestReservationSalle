@@ -65,9 +65,9 @@ public class Entreprise {
         equipementLibres = new HashMap<>(Map.of(Ecran, 5, Pieuvre, 4, Webcam, 4, Tableau, 2));
     }
 
-    //Remplit la liste de réservation en respactant les contraintes
+    //Cette fontion implémente l'algorithme de réservation de salle. Son fonctionnement est expliqué dans le fichier Readme.
     public void createPlanning() {
-        //On crée et on initialise une Map qui associe à chaque réunion ses salles potentielles
+        //On crée une Map qui associant à chaque réunion la liste des salles
         Map<Reunion,List<Salle>> ReunionsNonReservees = new TreeMap<>();
         for(Reunion r : reunions){
             ReunionsNonReservees.put(r,new ArrayList<>(locaux));
@@ -82,12 +82,11 @@ public class Entreprise {
         while(ReunionsNonReservees.size()>0){
             //Tant qu'il y a des réunions avec une seule salle possible, on les cherche pour les réserver
             while(ReunionsNonReservees.values().stream().anyMatch(x -> x.size()==1)){
-                //On parcourt les Reunions, si une réunion n'a qu'une salle possible, on lui assigne
                 for(Map.Entry<Reunion,List<Salle>> rnr : ReunionsNonReservees.entrySet()){
                     if(rnr.getValue().size()==1){
                         Reunion r = rnr.getKey();
                         Salle s = rnr.getValue().get(0);
-                        //Si la salle est disponible, on crée une nouvelle réservation
+                        //On vérifie si la salle est disponible, si c'est le cas, on crée une nouvelle réservation
                         if(isSalleDisponible(s,r.getCreneau()) && isMaterielDisponible(r,s)){
                             Reservation newRes = new Reservation(r,s);
                             newRes.setEquipementReserve(new HashMap<>(Map.of(Ecran, 0, Pieuvre, 0, Webcam, 0, Tableau, 0)));
@@ -117,7 +116,8 @@ public class Entreprise {
                                     break;
                             }
                             reservations.add(newRes);
-                        }else{
+                        }
+                        else{
                             reservations.add(new Reservation(r,null));
                         }
                     }
