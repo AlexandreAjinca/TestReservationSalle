@@ -38,7 +38,7 @@ class EntrepriseTest {
         boolean result = true;
         for(Reservation r : e.getReservations()){
             if(r.getSalle()==null){
-                continue;
+
             }
             else if(e.getReservations().stream().anyMatch( x -> x!=r &&  r.getSalle() == x.getSalle() && ( r.getReunion().getCreneau()==x.getReunion().getCreneau() || r.getReunion().getCreneau()==x.getReunion().getCreneau()-1))){
                 result = false;
@@ -47,9 +47,9 @@ class EntrepriseTest {
         assertTrue(result);
     }
 
-    //Teste si la quantité de matériel réservée à chaque créneau est cohérente (inférieure ou égale à la quantité de matériel libre)
+    //Teste si la quantité d'équipement réservée à chaque créneau est cohérente (inférieure ou égale à la quantité d'équipement libre)
     @org.junit.jupiter.api.Test
-    void testQuantiteMaterielCoherent() {
+    void testQuantiteEquipementCoherent() {
         boolean result = true;
         int[] creneaux = {8,9,10,11};
         for(int c : creneaux){
@@ -62,7 +62,7 @@ class EntrepriseTest {
                         total += r.getEquipementReserve().get(te);
                     }
                 }
-                if(total>e.getEquipementLibres().get(te)){
+                if(total>e.getEquipementsLibres().get(te)){
                     result = false;
                 }
             }
@@ -81,7 +81,7 @@ class EntrepriseTest {
                     result = true;
                 }
             }
-            if(result == false)
+            if(!result)
                 break;
         }
         assertTrue(result);

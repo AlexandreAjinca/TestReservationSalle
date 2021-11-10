@@ -6,11 +6,17 @@ import java.util.stream.Collectors;
 import static model.data.Reunion.TypeReunion.*;
 import static model.data.TypeEquipement.*;
 
+/**
+ * Représente l'entreprise avec les réunions, les salles, le matériel libre et le planning de réservations.
+ * Contient également les fonctions permettant la création du planning
+ */
 public class Entreprise {
 
     private List<Reunion> reunions = new ArrayList<>();
     private List<Salle> locaux = new ArrayList<>();
-    private Map<TypeEquipement,Integer> equipementLibres = new HashMap<>();
+    //L'équipement pouvant être emprunté pour une réunion
+    private Map<TypeEquipement,Integer> equipementsLibres = new HashMap<>();
+    //La liste des réservations de l'entreprise
     private List<Reservation> reservations = new ArrayList<>();
 
     //Pattern singleton
@@ -62,7 +68,7 @@ public class Entreprise {
         locaux.add(new Salle("E3003",9,new HashMap<>(Map.of(Ecran, 1, Pieuvre, 1, Webcam, 0, Tableau, 0))));
         locaux.add(new Salle("E3004",4,new HashMap<>(Map.of(Ecran, 0, Pieuvre, 0, Webcam, 0, Tableau, 0))));
 
-        equipementLibres = new HashMap<>(Map.of(Ecran, 5, Pieuvre, 4, Webcam, 4, Tableau, 2));
+        equipementsLibres = new HashMap<>(Map.of(Ecran, 5, Pieuvre, 4, Webcam, 4, Tableau, 2));
     }
 
     //Cette fontion implémente l'algorithme de réservation de salle. Son fonctionnement est expliqué dans le fichier Readme.
@@ -87,10 +93,10 @@ public class Entreprise {
                         Reunion r = rnr.getKey();
                         Salle s = rnr.getValue().get(0);
                         //On vérifie si la salle est disponible, si c'est le cas, on crée une nouvelle réservation
-                        if(isSalleDisponible(s,r.getCreneau()) && isMaterielDisponible(r,s)){
+                        if(isSalleDisponible(s,r.getCreneau()) && isEquipementDisponible(r,s)){
                             Reservation newRes = new Reservation(r,s);
                             newRes.setEquipementReserve(new HashMap<>(Map.of(Ecran, 0, Pieuvre, 0, Webcam, 0, Tableau, 0)));
-                            //On ajoute le matériel manquant à la salle
+                            //On ajoute l'équipement manquant à la salle
                             switch(r.getType()) {
                                 case VC:
                                     if (s.getEquipements().get(Ecran) == 0)
@@ -141,10 +147,10 @@ public class Entreprise {
                     Reunion r =  rnr.getKey();
                     Salle s = rnr.getValue().stream().sorted().collect(Collectors.toList()).get(0);
                     //Si la salle est disponible, on crée une nouvelle réservation
-                    if(isSalleDisponible(s,r.getCreneau()) && isMaterielDisponible(r,s)){
+                    if(isSalleDisponible(s,r.getCreneau()) && isEquipementDisponible(r,s)){
                         Reservation newRes = new Reservation(r,s);
                         newRes.setEquipementReserve(new HashMap<>(Map.of(Ecran, 0, Pieuvre, 0, Webcam, 0, Tableau, 0)));
-                        //On ajoute le matériel manquant à la salle
+                        //On ajoute l'équipement manquant à la salle
                         switch(r.getType()) {
                             case VC:
                                 if (s.getEquipements().get(Ecran) == 0)
@@ -171,7 +177,7 @@ public class Entreprise {
                         }
                         reservations.add(newRes);
                     }else{
-                        //Si la salle n'est pas dispo ou qu'on ne peut pas y ajouter le matériel, on la retire des salles possibles
+                        //Si la salle n'est pas dispo ou qu'on ne peut pas y ajouter l'équipement, on la retire des salles possibles
                         rnr.getValue().remove(s);
                     }
                 }
@@ -189,7 +195,7 @@ public class Entreprise {
         }
     }
 
-    //Retourne false si la salle est réservée à ce créneau (ou celui d'avant à cause des restrictions COVID)
+    //Vérifie si la salle est réservée à ce créneau (ou aux créneaux adjacents à cause des restrictions COVID)
     public boolean isSalleDisponible(Salle s, int creneau){
         for(Reservation r : reservations){
             if(r.getSalle()==s && (r.getReunion().getCreneau()==creneau || r.getReunion().getCreneau()-1==creneau || r.getReunion().getCreneau()+1==creneau)) {
@@ -199,8 +205,8 @@ public class Entreprise {
         return true;
     }
 
-    //On vérifie si le matériel est disponible à l'emprunt pour cette réunion, à cette salle et dans ce créneau
-    public boolean isMaterielDisponible(Reunion r, Salle s){
+    //Vérifie si il reste assez d'équipement disponible à ce créneau pour pouvoir tenir la réunion dans cette salle.
+    public boolean isEquipementDisponible(Reunion r, Salle s){
         int creneau = r.getCreneau();
         boolean result = true;
         Map<TypeEquipement,Integer> equipementReserveCeCreneau = new HashMap<>();
@@ -217,31 +223,33 @@ public class Entreprise {
         }
         switch(r.getType()){
             case VC:
-                if (s.getEquipements().get(Ecran) == 0 && equipementReserveCeCreneau.get(Ecran)>=equipementLibres.get(Ecran))
+                if (s.getEquipements().get(Ecran) == 0 && equipementReserveCeCreneau.get(Ecran)>= equipementsLibres.get(Ecran))
                     result = false;
-                if (s.getEquipements().get(Pieuvre) == 0 && equipementReserveCeCreneau.get(Pieuvre)>=equipementLibres.get(Pieuvre))
+                if (s.getEquipements().get(Pieuvre) == 0 && equipementReserveCeCreneau.get(Pieuvre)>= equipementsLibres.get(Pieuvre))
                     result = false;
-                if (s.getEquipements().get(Webcam) == 0 && equipementReserveCeCreneau.get(Webcam)>=equipementLibres.get(Webcam))
+                if (s.getEquipements().get(Webcam) == 0 && equipementReserveCeCreneau.get(Webcam)>= equipementsLibres.get(Webcam))
                     result = false;
                 break;
             case SPEC:
-                if (s.getEquipements().get(Tableau) == 0 && equipementReserveCeCreneau.get(Tableau)>=equipementLibres.get(Tableau))
+                if (s.getEquipements().get(Tableau) == 0 && equipementReserveCeCreneau.get(Tableau)>= equipementsLibres.get(Tableau))
                     result = false;
                 break;
             case RS:
                 break;
             case RC:
-                if (s.getEquipements().get(Ecran) == 0 && equipementReserveCeCreneau.get(Ecran)>=equipementLibres.get(Ecran))
+                if (s.getEquipements().get(Ecran) == 0 && equipementReserveCeCreneau.get(Ecran)>= equipementsLibres.get(Ecran))
                     result = false;
-                if (s.getEquipements().get(Pieuvre) == 0 && equipementReserveCeCreneau.get(Pieuvre)>=equipementLibres.get(Pieuvre))
+                if (s.getEquipements().get(Pieuvre) == 0 && equipementReserveCeCreneau.get(Pieuvre)>= equipementsLibres.get(Pieuvre))
                     result = false;
-                if (s.getEquipements().get(Tableau) == 0 && equipementReserveCeCreneau.get(Tableau)>=equipementLibres.get(Tableau))
+                if (s.getEquipements().get(Tableau) == 0 && equipementReserveCeCreneau.get(Tableau)>= equipementsLibres.get(Tableau))
                     result = false;
         }
         return result;
     }
 
-    //Affiche la liste des réservations
+    /**
+     * Affiche la liste des réservations
+     */
     public void displayReservations() {
         System.out.println("LISTE DES RESERVATIONS : ");
         for(Reservation e : reservations){
@@ -270,12 +278,12 @@ public class Entreprise {
         this.locaux = locaux;
     }
 
-    public Map<TypeEquipement, Integer> getEquipementLibres() {
-        return equipementLibres;
+    public Map<TypeEquipement, Integer> getEquipementsLibres() {
+        return equipementsLibres;
     }
 
-    public void setEquipementLibres(Map<TypeEquipement, Integer> equipementLibres) {
-        this.equipementLibres = equipementLibres;
+    public void setEquipementsLibres(Map<TypeEquipement, Integer> equipementsLibres) {
+        this.equipementsLibres = equipementsLibres;
     }
 
     public List<Reservation> getReservations() {
@@ -307,7 +315,7 @@ public class Entreprise {
         }
         result+="\nEQUIPEMENTS LIBRES : \n";
         for (Map.Entry<TypeEquipement,Integer> el:
-                equipementLibres.entrySet()) {
+                equipementsLibres.entrySet()) {
             result+= el.getKey() + " " + el.getValue() + " ";
             result+="\n";
         }

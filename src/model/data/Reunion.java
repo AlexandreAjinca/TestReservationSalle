@@ -2,6 +2,7 @@ package model.data;
 
 public class Reunion implements Comparable {
 
+    //Les différents types de réunion
     public enum TypeReunion{
         VC,
         SPEC,
